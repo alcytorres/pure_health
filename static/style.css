@@ -6,18 +6,50 @@ body {
   font-family: sans-serif;
 }
 
-.title {
-  text-align: center;
-  padding: 20px 0;
-  font-size: 24px;
-  color: #fff;
-}
-
 .calendar-container {
   width: 100%;
   max-width: 400px;
   margin: 0 auto;
+  padding: 10px;
+  box-sizing: border-box;
 }
+
+.title {
+  text-align: center;
+  padding: 10px 0;
+  font-size: 20px;
+  color: #fff;
+}
+
+/* NEW: Simple styling for the form */
+.month-year-form { /* NEW */
+  display: flex; /* NEW */
+  justify-content: center; /* NEW */
+  align-items: center; /* NEW */
+  gap: 10px; /* NEW */
+  margin-bottom: 10px; /* NEW */
+} /* NEW */
+
+.form-label { /* NEW */
+  font-size: 14px; /* NEW */
+} /* NEW */
+
+.form-select { /* NEW */
+  background: #333; /* NEW */
+  color: #fff; /* NEW */
+  border: 1px solid #555; /* NEW */
+  padding: 5px; /* NEW */
+  font-size: 14px; /* NEW */
+} /* NEW */
+
+.form-button { /* NEW */
+  background: #00adee; /* NEW */
+  color: #fff; /* NEW */
+  border: none; /* NEW */
+  padding: 6px 10px; /* NEW */
+  cursor: pointer; /* NEW */
+  font-size: 14px; /* NEW */
+} /* NEW */
 
 .calendar-grid {
   display: grid;
