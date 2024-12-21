@@ -50,37 +50,36 @@ body {
   font-size: 14px;
 }
 
-/* NEW: Panel to show the clicked day’s steps */
-.day-info-panel { /* NEW */
-  background: #111; /* NEW */
-  padding: 10px; /* NEW */
-  margin: 10px 0; /* NEW */
-  text-align: center; /* NEW */
-  border: 1px solid #444; /* NEW */
-  border-radius: 5px; /* NEW */
-} /* NEW */
+.day-info-panel {
+  background: #111;
+  padding: 10px;
+  margin: 10px 0;
+  text-align: center;
+  border: 1px solid #444;
+  border-radius: 5px;
+}
 
-/* NEW: Days-of-week row styling */
-.days-of-week-row { /* NEW */
-  display: grid; /* NEW */
-  grid-template-columns: repeat(7, 1fr); /* NEW */
-  gap: 10px; /* NEW */
-  padding: 0 10px; /* NEW */
-  margin-bottom: 10px; /* NEW */
-} /* NEW */
+/* Days-of-week row styling */
+.days-of-week-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  padding: 0 10px;
+  margin-bottom: 10px;
+}
 
-.day-of-week-cell { /* NEW */
-  text-align: center; /* NEW */
-  font-weight: bold; /* NEW */
-  font-size: 14px; /* NEW */
-  color: #aaa; /* subtle color */ /* NEW */
-} /* NEW */
+.day-of-week-cell {
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+  color: #aaa;
+}
 
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 10px;
-  padding: 0 10px; /* changed from 10px for alignment with days-of-week row */
+  padding: 0 10px;
 }
 
 .day-cell {
@@ -95,12 +94,12 @@ body {
   position: relative;
   width: 40px;
   height: 40px;
-  cursor: pointer; /* NEW: show clickable cursor */
+  cursor: pointer;
 }
 
-.placeholder-circle { /* NEW: placeholders also show no day number */
-  opacity: 0.3; 
-  cursor: default; /* not clickable */
+.placeholder-circle {
+  opacity: 0.3;
+  cursor: default;
 }
 
 .day-number {
@@ -142,4 +141,70 @@ body {
 .circle-full {
   fill: #00adee;
   stroke: none;
+}
+
+/* NEW: Styles for the new range + chart section */
+.range-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 20px auto;
+  background: #111;
+  padding: 15px;
+  box-sizing: border-box;
+  border: 1px solid #444;
+  border-radius: 5px;
+}
+
+.range-title {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.range-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.range-label {
+  font-size: 14px;
+}
+
+.range-input {
+  background: #333;
+  color: #fff;
+  border: 1px solid #555;
+  padding: 4px;
+  font-size: 14px;
+}
+
+.range-select {
+  background: #333;
+  color: #fff;
+  border: 1px solid #555;
+  padding: 4px;
+  font-size: 14px;
+}
+
+.range-button {
+  background: #00adee;
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.chart-container {
+  position: relative;
+  margin: 0 auto;
+  max-width: 800px;
+}
+
+#lineChart {
+  background: #222;
+  border-radius: 5px;
+  padding: 10px;
 }
