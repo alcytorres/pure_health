@@ -8,75 +8,108 @@
 </head>
 <body>
 <div class="calendar-container">
-  <!--
-    # NEW: Add a form to choose month/year.
-    We’ll keep it simple: drop-downs for month and year.
-    Submitting the form triggers a GET request with parameters.
-  -->
-  <form method="GET" class="month-year-form"> <!-- NEW -->
-    <label for="year" class="form-label">Year:</label> <!-- NEW -->
-    <select name="year" id="year" class="form-select"> <!-- NEW -->
-      {% for y in range(2016, 2025) %} <!-- NEW: 2016 to 2024 inclusive -->
+  <form method="GET" class="month-year-form">
+    <label for="year" class="form-label">Year:</label>
+    <select name="year" id="year" class="form-select">
+      {% for y in range(2016, 2025) %}
       <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
       {% endfor %}
     </select>
     
-    <label for="month" class="form-label">Month:</label> <!-- NEW -->
-    <select name="month" id="month" class="form-select"> <!-- NEW -->
-      {% for m in range(1,13) %} <!-- 1 to 12 -->
+    <label for="month" class="form-label">Month:</label>
+    <select name="month" id="month" class="form-select">
+      {% for m in range(1,13) %}
       <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>{{ m }}</option>
       {% endfor %}
     </select>
     
-    <button type="submit" class="form-button">Go</button> <!-- NEW -->
+    <button type="submit" class="form-button">Go</button>
   </form>
 
+  <!-- Title showing selected month and year -->
+  {% set month_names = [
+    'January','February','March','April','May','June',
+    'July','August','September','October','November','December'
+  ] %}
   <h1 class="title">
-    <!--
-      # NEW: Dynamically show the chosen year & month name
-      We'll do a simple approach: month number + year
-      Or we can map month number to month name. For brevity, keep it numeric or do a quick month map.
-    -->
-    {% set month_names = [
-      'January','February','March','April','May','June',
-      'July','August','September','October','November','December'
-    ] %}
     {{ month_names[selected_month - 1] }} {{ selected_year }}
   </h1>
 
-  <!-- The calendar grid -->
+  <!-- NEW: Info panel for displaying the clicked day’s steps -->
+  <div id="day-info" class="day-info-panel"> <!-- NEW -->
+    Click on a day to see step details.
+  </div> <!-- NEW -->
+
+  <!--
+    Days of the Week Row (Sunday through Saturday)
+    We'll use a 7-column grid so it lines up nicely.
+  -->
+  <!-- NEW: "days-of-week-row" above the circles -->
+  <div class="days-of-week-row"> <!-- NEW -->
+    <div class="day-of-week-cell">Sun</div>
+    <div class="day-of-week-cell">Mon</div>
+    <div class="day-of-week-cell">Tue</div>
+    <div class="day-of-week-cell">Wed</div>
+    <div class="day-of-week-cell">Thu</div>
+    <div class="day-of-week-cell">Fri</div>
+    <div class="day-of-week-cell">Sat</div>
+  </div> <!-- NEW -->
+
+  <!-- The calendar grid (7 columns wide) -->
   <div class="calendar-grid">
-    {% for day, steps in month_data %}
-    <div class="day-cell">
+    {% for day, steps, is_placeholder in month_grid %}
+      {% if is_placeholder %}
+      <!-- Placeholder circle -->
+      <div class="day-cell">
+        <div class="day-circle placeholder-circle" 
+             data-day="0" data-steps="0"> <!-- NEW: data attributes -->
+          <svg class="circle-svg" viewBox="0 0 40 40">
+            <circle class="circle-bg-empty" cx="20" cy="20" r="18"></circle>
+          </svg>
+          <div class="day-number"></div> <!-- no day number -->
+        </div>
+      </div>
+      {% else %}
+      <!-- Real day, partial or full circle -->
       {% set fraction = steps / goal if steps < goal else 1 %}
-      <div class="day-circle">
+      <div class="day-cell">
         {% if steps == 0 %}
         <!-- Empty circle -->
-        <svg class="circle-svg" viewBox="0 0 40 40">
-          <circle class="circle-bg-empty" cx="20" cy="20" r="18"></circle>
-        </svg>
+        <div class="day-circle" data-day="{{ day }}" data-steps="{{ steps }}"> <!-- NEW: data attributes -->
+          <svg class="circle-svg" viewBox="0 0 40 40">
+            <circle class="circle-bg-empty" cx="20" cy="20" r="18"></circle>
+          </svg>
+          <div class="day-number">{{ day }}</div>
+        </div>
         {% elif steps >= goal %}
         <!-- Full circle -->
-        <svg class="circle-svg" viewBox="0 0 40 40">
-          <circle class="circle-full" cx="20" cy="20" r="18"></circle>
-        </svg>
+        <div class="day-circle" data-day="{{ day }}" data-steps="{{ steps }}"> <!-- NEW -->
+          <svg class="circle-svg" viewBox="0 0 40 40">
+            <circle class="circle-full" cx="20" cy="20" r="18"></circle>
+          </svg>
+          <div class="day-number">{{ day }}</div>
+        </div>
         {% else %}
         <!-- Partial circle -->
         {% set circumference = 2 * 3.14159 * 18 %}
         {% set offset = circumference * (1 - fraction) %}
-        <svg class="circle-svg" viewBox="0 0 40 40">
-          <circle class="circle-bg" cx="20" cy="20" r="18"></circle>
-          <circle class="circle-progress" cx="20" cy="20" r="18"
-            stroke-dasharray="{{ circumference }}"
-            stroke-dashoffset="{{ offset }}"
-          ></circle>
-        </svg>
+        <div class="day-circle" data-day="{{ day }}" data-steps="{{ steps }}"> <!-- NEW -->
+          <svg class="circle-svg" viewBox="0 0 40 40">
+            <circle class="circle-bg" cx="20" cy="20" r="18"></circle>
+            <circle class="circle-progress" cx="20" cy="20" r="18"
+              stroke-dasharray="{{ circumference }}"
+              stroke-dashoffset="{{ offset }}"
+            ></circle>
+          </svg>
+          <div class="day-number">{{ day }}</div>
+        </div>
         {% endif %}
-        <div class="day-number">{{ day }}</div>
       </div>
-    </div>
+      {% endif %}
     {% endfor %}
   </div>
 </div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script> <!-- NEW: load script -->
 </body>
 </html>
