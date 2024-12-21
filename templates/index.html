@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Step Calendar</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="calendar-container">
+  <h1 class="title">November 2024</h1>
+  <div class="calendar-grid">
+    {% for day, steps in month_data %}
+    <div class="day-cell">
+      {% set fraction = steps / goal if steps < goal else 1 %}
+      <div class="day-circle">
+        {% if steps == 0 %}
+        <!-- Empty circle -->
+        <svg class="circle-svg" viewBox="0 0 40 40">
+          <circle class="circle-bg-empty" cx="20" cy="20" r="18"></circle>
+        </svg>
+        {% elif steps >= goal %}
+        <!-- Full circle -->
+        <svg class="circle-svg" viewBox="0 0 40 40">
+          <circle class="circle-full" cx="20" cy="20" r="18"></circle>
+        </svg>
+        {% else %}
+        <!-- Partial circle -->
+        {% set circumference = 2 * 3.14159 * 18 %}
+        {% set offset = circumference * (1 - fraction) %}
+        <svg class="circle-svg" viewBox="0 0 40 40">
+          <circle class="circle-bg" cx="20" cy="20" r="18"></circle>
+          <circle class="circle-progress" cx="20" cy="20" r="18"
+            stroke-dasharray="{{ circumference }}"
+            stroke-dashoffset="{{ offset }}"
+          ></circle>
+        </svg>
+        {% endif %}
+        <div class="day-number">{{ day }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+</body>
+</html>
