@@ -81,13 +81,10 @@ def index():
     end_date_str = request.args.get('end_date', '')
     group_by = request.args.get('group_by', 'day')  # can be 'day', 'week', 'month'
 
-    # 2) Provide defaults if no range specified (e.g., last 30 days)
-    #    We'll consider today's date as the default end, 
-    #    and 30 days before as the start.
-    today = datetime.now().date()
+    # 2) Provide defaults if no range specified (changed to full year 2024)
     if not start_date_str or not end_date_str:
-        default_end = today
-        default_start = today - timedelta(days=29)
+        default_start = datetime(2024, 1, 1).date()
+        default_end = datetime(2024, 12, 31).date()
         start_date_str = default_start.strftime('%Y-%m-%d')
         end_date_str = default_end.strftime('%Y-%m-%d')
 
@@ -95,12 +92,12 @@ def index():
     try:
         range_start = datetime.strptime(start_date_str, '%Y-%m-%d').date()
     except:
-        range_start = today - timedelta(days=29)
+        range_start = datetime(2024, 1, 1).date()
         start_date_str = range_start.strftime('%Y-%m-%d')
     try:
         range_end = datetime.strptime(end_date_str, '%Y-%m-%d').date()
     except:
-        range_end = today
+        range_end = datetime(2024, 12, 31).date()
         end_date_str = range_end.strftime('%Y-%m-%d')
 
     if range_start > range_end:
