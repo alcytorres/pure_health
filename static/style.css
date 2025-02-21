@@ -208,3 +208,27 @@ body {
   border-radius: 5px;
   padding: 10px;
 }
+
+
+/* NEW: Dashboard styles */
+.dashboard {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.dashboard a {
+  text-decoration: none;
+  color: #00adee;
+  font-size: 18px;
+}
+
+.dashboard a:hover {
+  text-decoration: underline;
+}
+
+.dashboard a.active {
+  font-weight: bold;
+  color: #fff;
+}

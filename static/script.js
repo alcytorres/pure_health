@@ -1,19 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Existing day-circle click handling
   const dayCircles = document.querySelectorAll('.day-circle');
   const infoPanel = document.getElementById('day-info');
 
+  // NEW: Dynamic day info based on data type
   dayCircles.forEach(circle => {
     circle.addEventListener('click', () => {
       const day = circle.getAttribute('data-day');
-      const steps = circle.getAttribute('data-steps');
+      const value = circle.getAttribute('data-value');  // NEW: Changed 'data-steps' to 'data-value'
       if (day !== "0") {
-        infoPanel.textContent = `Day ${day}: Steps = ${steps}`;
+        let displayValue = dataType === 'steps' ? parseInt(value) : parseFloat(value).toFixed(1);
+        infoPanel.textContent = `Day ${day}: ${chartLabel} = ${displayValue}`;
       }
     });
   });
 
-  // NEW: Render the line chart using the data from the template
   if (typeof chartLabels !== 'undefined' && typeof chartValues !== 'undefined') {
     const ctx = document.getElementById('lineChart').getContext('2d');
     const chart = new Chart(ctx, {
@@ -21,7 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
       data: {
         labels: chartLabels,
         datasets: [{
-          label: 'Average Steps',
+          // NEW: Dynamic label
+          label: 'Average ' + chartLabel,
           data: chartValues,
           borderColor: '#00adee',
           backgroundColor: 'rgba(0, 173, 238, 0.2)',
@@ -37,7 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
             beginAtZero: true,
             title: {
               display: true,
-              text: 'Steps'
+              // NEW: Dynamic y-axis title
+              text: chartUnit.charAt(0).toUpperCase() + chartUnit.slice(1)
             }
           },
           x: {

@@ -3,14 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Step Calendar</title>
+  <!-- NEW: Dynamic title -->
+  <title>{{ label }} Calendar</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <!-- NEW: Chart.js for the line graph -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- NEW -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+<!-- NEW: Dashboard navigation -->
+<div class="dashboard">
+  <a href="{{ url_for('index', data_type='steps', year=selected_year, month=selected_month) }}" {% if data_type == 'steps' %}class="active"{% endif %}>Steps</a>
+  <a href="{{ url_for('index', data_type='sleep', year=selected_year, month=selected_month) }}" {% if data_type == 'sleep' %}class="active"{% endif %}>Sleep</a>
+  <a href="{{ url_for('index', data_type='hydration', year=selected_year, month=selected_month) }}" {% if data_type == 'hydration' %}class="active"{% endif %}>Hydration</a>
+</div>
+
 <div class="calendar-container">
   <form method="GET" class="month-year-form">
+    <!-- NEW: Preserve data_type -->
+    <input type="hidden" name="data_type" value="{{ data_type }}">
     <label for="year" class="form-label">Year:</label>
     <select name="year" id="year" class="form-select">
       {% for y in range(2016, 2025) %}
@@ -28,19 +37,16 @@
     <button type="submit" class="form-button">Go</button>
   </form>
 
-  {% set month_names = [
-    'January','February','March','April','May','June',
-    'July','August','September','October','November','December'
-  ] %}
+  <!-- REMOVE: Inline month_names definition -->
+  <!-- NEW: Use passed month_names -->
   <h1 class="title">
-    {{ month_names[selected_month - 1] }} {{ selected_year }}
+    {{ label }} - {{ month_names[selected_month - 1] }} {{ selected_year }}
   </h1>
 
   <div id="day-info" class="day-info-panel">
-    Click on a day to see step details.
+    Click on a day to see details.
   </div>
 
-  <!-- Days of Week Row -->
   <div class="days-of-week-row">
     <div class="day-of-week-cell">Sun</div>
     <div class="day-of-week-cell">Mon</div>
@@ -51,12 +57,11 @@
     <div class="day-of-week-cell">Sat</div>
   </div>
 
-  <!-- Calendar grid -->
   <div class="calendar-grid">
-    {% for day, steps, is_placeholder in month_grid %}
+    {% for day, value, is_placeholder in month_grid %}  <!-- NEW: Changed 'steps' to 'value' -->
       {% if is_placeholder %}
       <div class="day-cell">
-        <div class="day-circle placeholder-circle" data-day="0" data-steps="0">
+        <div class="day-circle placeholder-circle" data-day="0" data-value="0">  <!-- NEW: Changed 'data-steps' to 'data-value' -->
           <svg class="circle-svg" viewBox="0 0 40 40">
             <circle class="circle-bg-empty" cx="20" cy="20" r="18"></circle>
           </svg>
@@ -64,17 +69,17 @@
         </div>
       </div>
       {% else %}
-        {% set fraction = steps / goal if steps < goal else 1 %}
+        {% set fraction = value / goal if value < goal else 1 %}  <!-- NEW: Changed 'steps' to 'value' -->
         <div class="day-cell">
-          {% if steps == 0 %}
-          <div class="day-circle" data-day="{{ day }}" data-steps="{{ steps }}">
+          {% if value == 0 %}
+          <div class="day-circle" data-day="{{ day }}" data-value="{{ value }}">  <!-- NEW: Changed 'data-steps' to 'data-value' -->
             <svg class="circle-svg" viewBox="0 0 40 40">
               <circle class="circle-bg-empty" cx="20" cy="20" r="18"></circle>
             </svg>
             <div class="day-number">{{ day }}</div>
           </div>
-          {% elif steps >= goal %}
-          <div class="day-circle" data-day="{{ day }}" data-steps="{{ steps }}">
+          {% elif value >= goal %}
+          <div class="day-circle" data-day="{{ day }}" data-value="{{ value }}">
             <svg class="circle-svg" viewBox="0 0 40 40">
               <circle class="circle-full" cx="20" cy="20" r="18"></circle>
             </svg>
@@ -83,7 +88,7 @@
           {% else %}
           {% set circumference = 2 * 3.14159 * 18 %}
           {% set offset = circumference * (1 - fraction) %}
-          <div class="day-circle" data-day="{{ day }}" data-steps="{{ steps }}">
+          <div class="day-circle" data-day="{{ day }}" data-value="{{ value }}">
             <svg class="circle-svg" viewBox="0 0 40 40">
               <circle class="circle-bg" cx="20" cy="20" r="18"></circle>
               <circle class="circle-progress" cx="20" cy="20" r="18"
@@ -100,43 +105,46 @@
   </div>
 </div>
 
-<!-- NEW: Date Range and Graph Section -->
-<div class="range-container"> <!-- NEW -->
-  <h2 class="range-title">Filter Data by Date Range</h2> <!-- NEW -->
-  <form method="GET" class="range-form"> <!-- NEW -->
-    <!-- We reuse the same route, so we keep existing parameters in hidden inputs if needed -->
-    <input type="hidden" name="year" value="{{ selected_year }}"> <!-- NEW -->
-    <input type="hidden" name="month" value="{{ selected_month }}"> <!-- NEW -->
+<div class="range-container">
+  <!-- NEW: Dynamic range title -->
+  <h2 class="range-title">Filter {{ label }} by Date Range</h2>
+  <form method="GET" class="range-form">
+    <!-- NEW: Preserve data_type -->
+    <input type="hidden" name="data_type" value="{{ data_type }}">
+    <input type="hidden" name="year" value="{{ selected_year }}">
+    <input type="hidden" name="month" value="{{ selected_month }}">
 
-    <label for="start_date" class="range-label">Start Date:</label> <!-- NEW -->
+    <label for="start_date" class="range-label">Start Date:</label>
     <input type="date" name="start_date" id="start_date" class="range-input" 
-           value="{{ start_date_str }}"> <!-- NEW -->
+           value="{{ start_date_str }}">
 
-    <label for="end_date" class="range-label">End Date:</label> <!-- NEW -->
+    <label for="end_date" class="range-label">End Date:</label>
     <input type="date" name="end_date" id="end_date" class="range-input" 
-           value="{{ end_date_str }}"> <!-- NEW -->
+           value="{{ end_date_str }}">
 
-    <label for="group_by" class="range-label">Group By:</label> <!-- NEW -->
-    <select name="group_by" id="group_by" class="range-select"> <!-- NEW -->
+    <label for="group_by" class="range-label">Group By:</label>
+    <select name="group_by" id="group_by" class="range-select">
       <option value="day" {% if group_by == 'day' %}selected{% endif %}>Days</option>
       <option value="week" {% if group_by == 'week' %}selected{% endif %}>Weeks</option>
       <option value="month" {% if group_by == 'month' %}selected{% endif %}>Months</option>
     </select>
 
-    <button type="submit" class="range-button">Apply</button> <!-- NEW -->
+    <button type="submit" class="range-button">Apply</button>
   </form>
 
-  <!-- NEW: The chart container -->
-  <div class="chart-container"> <!-- NEW -->
-    <canvas id="lineChart"></canvas> <!-- NEW -->
+  <div class="chart-container">
+    <canvas id="lineChart"></canvas>
   </div>
 </div>
 
 <script src="{{ url_for('static', filename='script.js') }}"></script>
 <script>
-/* NEW: Embedded data for the chart */
+/* NEW: Embedded data for the chart with dynamic variables */
+const dataType = "{{ data_type }}";
 const chartLabels = {{ chart_labels | tojson }};
 const chartValues = {{ chart_values | tojson }};
+const chartUnit = "{{ unit }}";
+const chartLabel = "{{ label }}";
 </script>
 
 </body>
