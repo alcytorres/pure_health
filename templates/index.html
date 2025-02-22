@@ -16,63 +16,62 @@
   <a href="{{ url_for('index', data_type='hydration', year=selected_year, month=selected_month) }}" {% if data_type == 'hydration' %}class="active"{% endif %}>Hydration</a>
 </div>
 
-<div class="calendar-container">
-  <form method="GET" class="month-year-form">
-    <!-- NEW: Preserve data_type -->
-    <input type="hidden" name="data_type" value="{{ data_type }}">
-    <label for="year" class="form-label">Year:</label>
-    <select name="year" id="year" class="form-select">
-      {% for y in range(2016, 2025) %}
-      <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
-      {% endfor %}
-    </select>
-    
-    <label for="month" class="form-label">Month:</label>
-    <select name="month" id="month" class="form-select">
-      {% for m in range(1,13) %}
-      <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>{{ m }}</option>
-      {% endfor %}
-    </select>
-    
-    <button type="submit" class="form-button">Go</button>
-  </form>
+<!-- NEW: Wrap calendar and range sections in a flex container -->
+<div class="content-wrapper">
+  <div class="calendar-container">
+    <form method="GET" class="month-year-form">
+      <input type="hidden" name="data_type" value="{{ data_type }}">
+      <label for="year" class="form-label">Year:</label>
+      <select name="year" id="year" class="form-select">
+        {% for y in range(2016, 2025) %}
+        <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+      </select>
+      
+      <label for="month" class="form-label">Month:</label>
+      <select name="month" id="month" class="form-select">
+        {% for m in range(1,13) %}
+        <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>{{ m }}</option>
+        {% endfor %}
+      </select>
+      
+      <button type="submit" class="form-button">Go</button>
+    </form>
 
-  <!-- REMOVE: Inline month_names definition -->
-  <!-- NEW: Use passed month_names -->
-  <h1 class="title">
-    {{ label }} - {{ month_names[selected_month - 1] }} {{ selected_year }}
-  </h1>
+    <h1 class="title">
+      {{ label }} - {{ month_names[selected_month - 1] }} {{ selected_year }}
+    </h1>
 
-  <div id="day-info" class="day-info-panel">
-    Click on a day to see details.
-  </div>
+    <div id="day-info" class="day-info-panel">
+      Click on a day to see details.
+    </div>
 
-  <div class="days-of-week-row">
-    <div class="day-of-week-cell">Sun</div>
-    <div class="day-of-week-cell">Mon</div>
-    <div class="day-of-week-cell">Tue</div>
-    <div class="day-of-week-cell">Wed</div>
-    <div class="day-of-week-cell">Thu</div>
-    <div class="day-of-week-cell">Fri</div>
-    <div class="day-of-week-cell">Sat</div>
-  </div>
+    <div class="days-of-week-row">
+      <div class="day-of-week-cell">Sun</div>
+      <div class="day-of-week-cell">Mon</div>
+      <div class="day-of-week-cell">Tue</div>
+      <div class="day-of-week-cell">Wed</div>
+      <div class="day-of-week-cell">Thu</div>
+      <div class="day-of-week-cell">Fri</div>
+      <div class="day-of-week-cell">Sat</div>
+    </div>
 
-  <div class="calendar-grid">
-    {% for day, value, is_placeholder in month_grid %}  <!-- NEW: Changed 'steps' to 'value' -->
-      {% if is_placeholder %}
-      <div class="day-cell">
-        <div class="day-circle placeholder-circle" data-day="0" data-value="0">  <!-- NEW: Changed 'data-steps' to 'data-value' -->
-          <svg class="circle-svg" viewBox="0 0 40 40">
-            <circle class="circle-bg-empty" cx="20" cy="20" r="18"></circle>
-          </svg>
-          <div class="day-number"></div>
+    <div class="calendar-grid">
+      {% for day, value, is_placeholder in month_grid %}
+        {% if is_placeholder %}
+        <div class="day-cell">
+          <div class="day-circle placeholder-circle" data-day="0" data-value="0">
+            <svg class="circle-svg" viewBox="0 0 40 40">
+              <circle class="circle-bg-empty" cx="20" cy="20" r="18"></circle>
+            </svg>
+            <div class="day-number"></div>
+          </div>
         </div>
-      </div>
-      {% else %}
-        {% set fraction = value / goal if value < goal else 1 %}  <!-- NEW: Changed 'steps' to 'value' -->
+        {% else %}
+        {% set fraction = value / goal if value < goal else 1 %}
         <div class="day-cell">
           {% if value == 0 %}
-          <div class="day-circle" data-day="{{ day }}" data-value="{{ value }}">  <!-- NEW: Changed 'data-steps' to 'data-value' -->
+          <div class="day-circle" data-day="{{ day }}" data-value="{{ value }}">
             <svg class="circle-svg" viewBox="0 0 40 40">
               <circle class="circle-bg-empty" cx="20" cy="20" r="18"></circle>
             </svg>
@@ -100,42 +99,90 @@
           </div>
           {% endif %}
         </div>
-      {% endif %}
-    {% endfor %}
+        {% endif %}
+      {% endfor %}
+    </div>
   </div>
-</div>
 
-<div class="range-container">
-  <!-- NEW: Dynamic range title -->
-  <h2 class="range-title">Filter {{ label }} by Date Range</h2>
-  <form method="GET" class="range-form">
-    <!-- NEW: Preserve data_type -->
-    <input type="hidden" name="data_type" value="{{ data_type }}">
-    <input type="hidden" name="year" value="{{ selected_year }}">
-    <input type="hidden" name="month" value="{{ selected_month }}">
+  <div class="range-container">
+    <h2 class="range-title">Filter {{ label }} by Date Range</h2>
+    <form method="GET" class="range-form">
+      <input type="hidden" name="data_type" value="{{ data_type }}">
+      <input type="hidden" name="year" value="{{ selected_year }}">
+      <input type="hidden" name="month" value="{{ selected_month }}">
 
-    <label for="start_date" class="range-label">Start Date:</label>
-    <input type="date" name="start_date" id="start_date" class="range-input" 
-           value="{{ start_date_str }}">
+      <label for="start_date" class="range-label">Start Date:</label>
+      <input type="date" name="start_date" id="start_date" class="range-input" 
+             value="{{ start_date_str }}">
 
-    <label for="end_date" class="range-label">End Date:</label>
-    <input type="date" name="end_date" id="end_date" class="range-input" 
-           value="{{ end_date_str }}">
+      <label for="end_date" class="range-label">End Date:</label>
+      <input type="date" name="end_date" id="end_date" class="range-input" 
+             value="{{ end_date_str }}">
 
-    <label for="group_by" class="range-label">Group By:</label>
-    <select name="group_by" id="group_by" class="range-select">
-      <option value="day" {% if group_by == 'day' %}selected{% endif %}>Days</option>
-      <option value="week" {% if group_by == 'week' %}selected{% endif %}>Weeks</option>
-      <option value="month" {% if group_by == 'month' %}selected{% endif %}>Months</option>
-    </select>
+      <label for="group_by" class="range-label">Group By:</label>
+      <select name="group_by" id="group_by" class="range-select">
+        <option value="day" {% if group_by == 'day' %}selected{% endif %}>Days</option>
+        <option value="week" {% if group_by == 'week' %}selected{% endif %}>Weeks</option>
+        <option value="month" {% if group_by == 'month' %}selected{% endif %}>Months</option>
+      </select>
 
-    <button type="submit" class="range-button">Apply</button>
-  </form>
+      <button type="submit" class="range-button">Apply</button>
+    </form>
 
-  <div class="chart-container">
-    <canvas id="lineChart"></canvas>
+    <div class="chart-container">
+      <canvas id="lineChart"></canvas>
+    </div>
   </div>
+</div> <!-- NEW: Closing tag for content-wrapper -->
+
+
+<!-- NEW: Stats table section -->
+<div class="stats-table">
+  <h2 class="stats-title">{{ label }} Statistics</h2>
+  <table class="stats-grid">
+    <thead>
+      <tr>
+        <th>Stat</th>
+        <th>Current Period</th>
+        <th>All Time</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Max Value</td>
+        <td>{{ current_stats.max }} {{ unit }}</td>
+        <td>{{ all_time_stats.max }} {{ unit }}</td>
+      </tr>
+      <tr>
+        <td>Min Value</td>
+        <td>{{ current_stats.min }} {{ unit }}</td>
+        <td>{{ all_time_stats.min }} {{ unit }}</td>
+      </tr>
+      <tr>
+        <td>Average Value</td>
+        <td>{{ current_stats.avg }} {{ unit }}</td>
+        <td>{{ all_time_stats.avg }} {{ unit }}</td>
+      </tr>
+      <tr>
+        <td>Highest Streak (Goal)</td>
+        <td>{{ current_stats.highest_streak }} days</td>
+        <td>{{ all_time_stats.highest_streak }} days</td>
+      </tr>
+      <tr>
+        <td>Current Streak (Goal)</td>
+        <td>{{ current_stats.current_streak }} days</td>
+        <td>{{ all_time_stats.current_streak }} days</td>
+      </tr>
+      <tr>
+        <td>% Days Meeting Goal</td>
+        <td>{{ current_stats.goal_percent }}%</td>
+        <td>{{ all_time_stats.goal_percent }}%</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
+</div> <!-- NEW: Closing content-wrapper (already present if previous change applied) -->
+
 
 <script src="{{ url_for('static', filename='script.js') }}"></script>
 <script>

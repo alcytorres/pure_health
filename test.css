@@ -1,53 +1,42 @@
-/* NEW: Style for custom select wrapper */
-.select-wrapper {
-  position: relative;
+/* Add to the end of your existing style.css */
+
+/* NEW: Stats table styles */
+.stats-table {
+  width: 100%;
+  max-width: 1200px;
+  margin: 20px auto 0;
+  background: #111;
+  border: 1px solid #444;
+  border-radius: 5px;
+  padding: 15px;
+  box-sizing: border-box;
 }
 
-/* NEW: Style for custom select buttons */
-.form-select-button {
-  background: #333;
+.stats-title {
+  text-align: center;
   color: #fff;
-  border: 1px solid #555;
-  padding: 5px;
-  font-size: 14px;
-  cursor: pointer;
-  width: 60px; /* Set width for year button */
+  font-size: 20px;
+  margin-bottom: 15px;
 }
 
-/* NEW: Style for month button, narrower */
-#month-button {
-  width: 30px;
-}
-
-/* NEW: Style for custom drop-down menus */
-.dropdown {
-  display: none;
-  position: absolute;
-  background: #333;
+.stats-grid {
+  width: 100%;
+  border-collapse: collapse;
   color: #fff;
-  border: 1px solid #555;
-  padding: 5px;
-  z-index: 1;
-  top: 100%; /* Position below the button */
-  left: 0;
-  width: 100%; /* Same width as the button */
 }
 
-/* NEW: Style for drop-down list items */
-.dropdown ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.stats-grid th, .stats-grid td {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #444;
 }
 
-.dropdown li {
-  padding: 5px;
+.stats-grid th {
+  background: #00adee;
+  font-weight: bold;
+  color: #fff;
 }
 
-.dropdown li:not(:last-child) {
-  border-bottom: 1px solid #555;
-}
-
-.dropdown li:not(.selected):hover {
-  background: #444;
+.stats-grid tr:last-child td {
+  border-bottom: none; /* Remove border from last row */
 }

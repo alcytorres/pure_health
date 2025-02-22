@@ -240,3 +240,84 @@ body {
 
 
 
+/* Add to the end of your existing style.css */
+
+/* NEW: Flex container for side-by-side layout */
+.content-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 20px auto;
+}
+
+/* NEW: Adjust widths and spacing */
+.calendar-container {
+  width: 40%;  /* NEW: Changed from 100%/max-width: 400px to fit side by side */
+  max-width: none;  /* NEW: Remove restrictive max-width */
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.range-container {
+  width: 60%;  /* NEW: Adjusted width to complement calendar */
+  max-width: none;  /* NEW: Remove restrictive max-width */
+  margin: 0;  /* NEW: Override original margin to fit flex layout */
+  background: #111;
+  padding: 15px;
+  box-sizing: border-box;
+  border: 1px solid #444;
+  border-radius: 5px;
+}
+
+/* NEW: Flex container with increased top margin */
+.content-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  max-width: 1200px;
+  margin: 80px auto;  /* NEW: Increased from 20px to 40px to move further down */
+}
+
+
+
+/* NEW: Stats table styles */
+.stats-table {
+  width: 100%;
+  max-width: 1200px;
+  margin: 20px auto 0;
+  background: #111;
+  border: 1px solid #444;
+  border-radius: 5px;
+  padding: 15px;
+  box-sizing: border-box;
+}
+
+.stats-title {
+  text-align: center;
+  color: #fff;
+  font-size: 20px;
+  margin-bottom: 15px;
+}
+
+.stats-grid {
+  width: 100%;
+  border-collapse: collapse;
+  color: #fff;
+}
+
+.stats-grid th, .stats-grid td {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #444;
+}
+
+.stats-grid th {
+  background: #00adee;
+  font-weight: bold;
+  color: #fff;
+}
+
+.stats-grid tr:last-child td {
+  border-bottom: none; /* Remove border from last row */
+}

@@ -1,38 +1,52 @@
-<div class="calendar-container">
-  <form method="GET" class="month-year-form">
-    <label class="form-label">Year:</label>
-    <div class="select-wrapper">
-      <button class="form-select-button" id="year-button">
-        {{ selected_year }}
-      </button>
-      <!-- NEW: Add custom year drop-down -->
-      <div class="dropdown" id="year-dropdown">
-        <ul>
-          {% for y in range(2016, 2025) %}
-          <li data-value="{{ y }}">{{ y }}</li>
-          {% endfor %}
-        </ul>
-      </div>
-    </div>
-    <input type="hidden" name="year" id="hidden-year" value="{{ selected_year }}">
+<!-- ... (within <div class="content-wrapper">, after <div class="range-container">) -->
 
-    <label class="form-label">Month:</label>
-    <div class="select-wrapper">
-      <button class="form-select-button" id="month-button">
-        {{ selected_month }}
-      </button>
-      <!-- NEW: Add custom month drop-down -->
-      <div class="dropdown" id="month-dropdown">
-        <ul>
-          {% for m in range(1,13) %}
-          <li data-value="{{ m }}">{{ m }}</li>
-          {% endfor %}
-        </ul>
-      </div>
-    </div>
-    <input type="hidden" name="month" id="hidden-month" value="{{ selected_month }}">
+</div> <!-- Closing range-container -->
 
-    <button type="submit" class="form-button">Go</button>
-  </form>
-  <!-- Rest of the template remains the same -->
+<!-- NEW: Stats table section -->
+<div class="stats-table">
+  <h2 class="stats-title">{{ label }} Statistics</h2>
+  <table class="stats-grid">
+    <thead>
+      <tr>
+        <th>Stat</th>
+        <th>Current Period</th>
+        <th>All Time</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Max Value</td>
+        <td>{{ current_stats.max }} {{ unit }}</td>
+        <td>{{ all_time_stats.max }} {{ unit }}</td>
+      </tr>
+      <tr>
+        <td>Min Value</td>
+        <td>{{ current_stats.min }} {{ unit }}</td>
+        <td>{{ all_time_stats.min }} {{ unit }}</td>
+      </tr>
+      <tr>
+        <td>Average Value</td>
+        <td>{{ current_stats.avg }} {{ unit }}</td>
+        <td>{{ all_time_stats.avg }} {{ unit }}</td>
+      </tr>
+      <tr>
+        <td>Highest Streak (Goal)</td>
+        <td>{{ current_stats.highest_streak }} days</td>
+        <td>{{ all_time_stats.highest_streak }} days</td>
+      </tr>
+      <tr>
+        <td>Current Streak (Goal)</td>
+        <td>{{ current_stats.current_streak }} days</td>
+        <td>{{ all_time_stats.current_streak }} days</td>
+      </tr>
+      <tr>
+        <td>% Days Meeting Goal</td>
+        <td>{{ current_stats.goal_percent }}%</td>
+        <td>{{ all_time_stats.goal_percent }}%</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
+</div> <!-- NEW: Closing content-wrapper (already present if previous change applied) -->
+
+<!-- ... (script tags remain unchanged) -->
