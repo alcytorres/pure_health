@@ -99,7 +99,7 @@ def index():
     group_by = request.args.get('group_by', 'day')
 
     if not start_date_str or not end_date_str:
-        default_start = datetime(2024, 1, 1).date()
+        default_start = datetime(2024, 12, 1).date()
         default_end = datetime(2024, 12, 31).date()
         start_date_str = default_start.strftime('%Y-%m-%d')
         end_date_str = default_end.strftime('%Y-%m-%d')
@@ -129,7 +129,7 @@ def index():
     grouped_data = []
     if group_by == 'day':
         for d, val in date_value_list:  # NEW: Changed 'st' to 'val'
-            label = d.strftime('%Y-%m-%d')
+            label = d.strftime('%m-%d')
             grouped_data.append((label, val))
     elif group_by == 'week':
         week_sums = {}

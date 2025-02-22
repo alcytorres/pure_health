@@ -1,6 +1,8 @@
 body {
   margin: 0;
   padding: 0;
+  /* NEW: Add bottom padding for footer-like space */
+  padding-bottom: 50px;  /* Adjust this value as needed */
   background: #000;
   color: #fff;
   font-family: sans-serif;
@@ -215,7 +217,9 @@ body {
   display: flex;
   justify-content: center;
   gap: 20px;
-  margin-bottom: 20px;
+  /* NEW: Add top padding to lower the tabs and increase bottom margin for space */
+  padding-top: 30px;  /* Pushes tabs down from the top */
+  margin-bottom: 40px;  /* Increases space below tabs (previously 20px) */
 }
 
 .dashboard a {
@@ -232,3 +236,7 @@ body {
   font-weight: bold;
   color: #fff;
 }
+
+
+
+

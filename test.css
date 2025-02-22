@@ -1,0 +1,53 @@
+/* NEW: Style for custom select wrapper */
+.select-wrapper {
+  position: relative;
+}
+
+/* NEW: Style for custom select buttons */
+.form-select-button {
+  background: #333;
+  color: #fff;
+  border: 1px solid #555;
+  padding: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  width: 60px; /* Set width for year button */
+}
+
+/* NEW: Style for month button, narrower */
+#month-button {
+  width: 30px;
+}
+
+/* NEW: Style for custom drop-down menus */
+.dropdown {
+  display: none;
+  position: absolute;
+  background: #333;
+  color: #fff;
+  border: 1px solid #555;
+  padding: 5px;
+  z-index: 1;
+  top: 100%; /* Position below the button */
+  left: 0;
+  width: 100%; /* Same width as the button */
+}
+
+/* NEW: Style for drop-down list items */
+.dropdown ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dropdown li {
+  padding: 5px;
+}
+
+.dropdown li:not(:last-child) {
+  border-bottom: 1px solid #555;
+}
+
+.dropdown li:not(.selected):hover {
+  background: #444;
+}

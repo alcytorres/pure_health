@@ -6,10 +6,13 @@ document.addEventListener('DOMContentLoaded', () => {
   dayCircles.forEach(circle => {
     circle.addEventListener('click', () => {
       const day = circle.getAttribute('data-day');
-      const value = circle.getAttribute('data-value');  // NEW: Changed 'data-steps' to 'data-value'
+      const value = circle.getAttribute('data-value');
       if (day !== "0") {
-        let displayValue = dataType === 'steps' ? parseInt(value) : parseFloat(value).toFixed(1);
-        infoPanel.textContent = `Day ${day}: ${chartLabel} = ${displayValue}`;
+        // NEW: Updated format with commas, units, and capitalized month
+        const monthAbbr = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][parseInt(document.getElementById('month').value) - 1];
+        const numericValue = dataType === 'steps' ? parseInt(value) : parseFloat(value).toFixed(1);
+        const displayValue = dataType === 'steps' ? numericValue.toLocaleString() : numericValue;
+        infoPanel.textContent = `${monthAbbr} ${day}: ${displayValue} ${chartUnit}`;
       }
     });
   });
@@ -58,3 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+
+

@@ -1,0 +1,38 @@
+<div class="calendar-container">
+  <form method="GET" class="month-year-form">
+    <label class="form-label">Year:</label>
+    <div class="select-wrapper">
+      <button class="form-select-button" id="year-button">
+        {{ selected_year }}
+      </button>
+      <!-- NEW: Add custom year drop-down -->
+      <div class="dropdown" id="year-dropdown">
+        <ul>
+          {% for y in range(2016, 2025) %}
+          <li data-value="{{ y }}">{{ y }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    <input type="hidden" name="year" id="hidden-year" value="{{ selected_year }}">
+
+    <label class="form-label">Month:</label>
+    <div class="select-wrapper">
+      <button class="form-select-button" id="month-button">
+        {{ selected_month }}
+      </button>
+      <!-- NEW: Add custom month drop-down -->
+      <div class="dropdown" id="month-dropdown">
+        <ul>
+          {% for m in range(1,13) %}
+          <li data-value="{{ m }}">{{ m }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    <input type="hidden" name="month" id="hidden-month" value="{{ selected_month }}">
+
+    <button type="submit" class="form-button">Go</button>
+  </form>
+  <!-- Rest of the template remains the same -->
+</div>
