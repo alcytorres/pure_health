@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 # NEW: Define data types with their goals, units, CSV files, and labels
 data_types = {
-    'steps': {'goal': 10000, 'unit': 'steps', 'csv': 'steps_data.csv', 'label': 'Steps', 'column': 'steps'},
+    'steps': {'goal': 8000, 'unit': 'steps', 'csv': 'steps_data.csv', 'label': 'Steps', 'column': 'steps'},
     'sleep': {'goal': 8, 'unit': 'hours', 'csv': 'sleep_data.csv', 'label': 'Sleep Hours', 'column': 'value'},
     'hydration': {'goal': 2, 'unit': 'liters', 'csv': 'hydration_data.csv', 'label': 'Hydration (liters)', 'column': 'value'},
 }
@@ -33,7 +33,7 @@ def index():
     column = data_types[data_type]['column']
 
     year_str = request.args.get('year', '2024')
-    month_str = request.args.get('month', '11')
+    month_str = request.args.get('month', '12')
     
     try:
         year = int(year_str)
@@ -211,6 +211,11 @@ def index():
     # NEW: Calculate stats for all-time (full dataset)
     all_time_stats = calculate_stats([(d, v) for d, v in all_data.items()], goal)
 
+    # NEW: Create stats_range string for the stats header based on the selected date range
+    start_display = range_start.strftime('%b') + " " + str(range_start.day)  # e.g., "Dec 1"
+    end_display = range_end.strftime('%b') + " " + str(range_end.day)          # e.g., "Dec 31"
+    stats_range = start_display + " - " + end_display
+
     return render_template(
         'index.html',
         month_data=month_data,
@@ -227,7 +232,8 @@ def index():
         group_by=group_by,
         chart_labels=chart_labels,
         chart_values=chart_values,
-        # NEW: Pass stats to template
+        # NEW: Pass stats_range to the template for dynamic stats header
+        stats_range=stats_range,
         current_stats=current_stats,
         all_time_stats=all_time_stats
     )

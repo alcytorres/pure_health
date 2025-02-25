@@ -39,7 +39,7 @@
     </form>
 
     <h1 class="title">
-      {{ label }} - {{ month_names[selected_month - 1] }} {{ selected_year }}
+      {{ month_names[selected_month - 1] }} {{ selected_year }}
     </h1>
 
     <div id="day-info" class="day-info-panel">
@@ -105,7 +105,7 @@
   </div>
 
   <div class="range-container">
-    <h2 class="range-title">Filter {{ label }} by Date Range</h2>
+    <h2 class="range-title">Filter by Date Range</h2>
     <form method="GET" class="range-form">
       <input type="hidden" name="data_type" value="{{ data_type }}">
       <input type="hidden" name="year" value="{{ selected_year }}">
@@ -138,7 +138,7 @@
 
 <!-- NEW: Stats table section -->
 <div class="stats-table">
-  <h2 class="stats-title">{{ label }} Statistics</h2>
+  <h2 class="stats-title">Stats for {{ stats_range }}</h2>
   <table class="stats-grid">
     <thead>
       <tr>
@@ -150,33 +150,40 @@
     <tbody>
       <tr>
         <td>Max Value</td>
-        <td>{{ current_stats.max }} {{ unit }}</td>
-        <td>{{ all_time_stats.max }} {{ unit }}</td>
+        <!-- NEW: Apply comma formatting (no decimals) -->
+        <td>{{ "{:,.0f}".format(current_stats.max) }} {{ unit }}</td>
+        <td>{{ "{:,.0f}".format(all_time_stats.max) }} {{ unit }}</td>
       </tr>
       <tr>
         <td>Min Value</td>
-        <td>{{ current_stats.min }} {{ unit }}</td>
-        <td>{{ all_time_stats.min }} {{ unit }}</td>
+        <!-- NEW: Apply comma formatting (no decimals) -->
+        <td>{{ "{:,.0f}".format(current_stats.min) }} {{ unit }}</td>
+        <td>{{ "{:,.0f}".format(all_time_stats.min) }} {{ unit }}</td>
       </tr>
       <tr>
         <td>Average Value</td>
-        <td>{{ current_stats.avg }} {{ unit }}</td>
-        <td>{{ all_time_stats.avg }} {{ unit }}</td>
-      </tr>
+        <!-- NEW: Apply comma formatting with one decimal place -->
+        <!-- NEW: If data_type is steps, round without decimals; otherwise, round to one decimal place -->
+        <td>{{ "{:,.0f}".format(current_stats.avg) if data_type == 'steps' else "{:,.1f}".format(current_stats.avg) }} {{ unit }}</td>
+        <td>{{ "{:,.0f}".format(all_time_stats.avg) if data_type == 'steps' else "{:,.1f}".format(all_time_stats.avg) }} {{ unit }}</td>
+        </tr>
       <tr>
         <td>Highest Streak (Goal)</td>
-        <td>{{ current_stats.highest_streak }} days</td>
-        <td>{{ all_time_stats.highest_streak }} days</td>
+        <!-- NEW: Apply comma formatting (no decimals) -->
+        <td>{{ "{:,.0f}".format(current_stats.highest_streak) }} days</td>
+        <td>{{ "{:,.0f}".format(all_time_stats.highest_streak) }} days</td>
       </tr>
       <tr>
         <td>Current Streak (Goal)</td>
-        <td>{{ current_stats.current_streak }} days</td>
-        <td>{{ all_time_stats.current_streak }} days</td>
+        <!-- NEW: Apply comma formatting (no decimals) -->
+        <td>{{ "{:,.0f}".format(current_stats.current_streak) }} days</td>
+        <td>N/A</td>
       </tr>
       <tr>
         <td>% Days Meeting Goal</td>
-        <td>{{ current_stats.goal_percent }}%</td>
-        <td>{{ all_time_stats.goal_percent }}%</td>
+        <!-- NEW: Apply comma formatting with one decimal place -->
+        <td>{{ "{:,.1f}".format(current_stats.goal_percent) }}%</td>
+        <td>{{ "{:,.1f}".format(all_time_stats.goal_percent) }}%</td>
       </tr>
     </tbody>
   </table>
