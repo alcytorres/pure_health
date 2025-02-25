@@ -2,16 +2,39 @@ document.addEventListener('DOMContentLoaded', () => {
   const dayCircles = document.querySelectorAll('.day-circle');
   const infoPanel = document.getElementById('day-info');
 
+  // NEW: Define a variable to store the timeout ID for delaying the hover actions
+  let hoverTimeout;
+
+  // NEW: Set default text
+  infoPanel.textContent = 'Hover over a day to see details.';
+
   dayCircles.forEach(circle => {
-    circle.addEventListener('click', () => {
-      const day = circle.getAttribute('data-day');
-      const value = circle.getAttribute('data-value');
-      if (day !== "0") {
-        const monthAbbr = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][parseInt(document.getElementById('month').value) - 1];
-        const numericValue = dataType === 'steps' ? parseInt(value) : parseFloat(value).toFixed(1);
-        const displayValue = dataType === 'steps' ? numericValue.toLocaleString() : numericValue;
-        infoPanel.textContent = `${monthAbbr} ${day}: ${displayValue} ${chartUnit}`;
-      }
+    // NEW: Use mouseover with a delay
+    circle.addEventListener('mouseover', () => {
+      clearTimeout(hoverTimeout);
+      hoverTimeout = setTimeout(() => {
+        const day = circle.getAttribute('data-day');
+        const value = circle.getAttribute('data-value');
+        if (day !== "0") {
+          const monthAbbr = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][parseInt(document.getElementById('month').value) - 1];
+          let displayValue;
+          // NEW: For steps and calories, format as integer with commas; otherwise, use one decimal.
+          if (dataType === 'steps' || dataType === 'calories') {
+              displayValue = parseInt(value).toLocaleString();
+          } else {
+              displayValue = parseFloat(value).toFixed(1);
+          }
+          infoPanel.textContent = `${monthAbbr} ${day}: ${displayValue} ${chartUnit}`;
+        }
+      }, 300);
+    });
+
+    // NEW: Use mouseout with a delay to reset the text
+    circle.addEventListener('mouseout', () => {
+      clearTimeout(hoverTimeout); // NEW: Clear any pending update
+      hoverTimeout = setTimeout(() => { // NEW: Delay reset by 300ms
+        infoPanel.textContent = 'Hover over a day to see details.';
+      }, 300); // NEW: 300ms delay
     });
   });
 

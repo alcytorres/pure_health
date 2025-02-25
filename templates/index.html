@@ -12,8 +12,9 @@
 <!-- NEW: Dashboard navigation -->
 <div class="dashboard">
   <a href="{{ url_for('index', data_type='steps', year=selected_year, month=selected_month) }}" {% if data_type == 'steps' %}class="active"{% endif %}>Steps</a>
-  <a href="{{ url_for('index', data_type='sleep', year=selected_year, month=selected_month) }}" {% if data_type == 'sleep' %}class="active"{% endif %}>Sleep</a>
   <a href="{{ url_for('index', data_type='hydration', year=selected_year, month=selected_month) }}" {% if data_type == 'hydration' %}class="active"{% endif %}>Hydration</a>
+  <a href="{{ url_for('index', data_type='calories', year=selected_year, month=selected_month) }}" {% if data_type == 'calories' %}class="active"{% endif %}>Calories</a>
+  <a href="{{ url_for('index', data_type='sleep', year=selected_year, month=selected_month) }}" {% if data_type == 'sleep' %}class="active"{% endif %}>Sleep</a>
 </div>
 
 <!-- NEW: Wrap calendar and range sections in a flex container -->
@@ -43,7 +44,7 @@
     </h1>
 
     <div id="day-info" class="day-info-panel">
-      Click on a day to see details.
+      Hover over a day to see details.
     </div>
 
     <div class="days-of-week-row">

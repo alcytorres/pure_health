@@ -10,6 +10,7 @@ data_types = {
     'steps': {'goal': 8000, 'unit': 'steps', 'csv': 'steps_data.csv', 'label': 'Steps', 'column': 'steps'},
     'sleep': {'goal': 8, 'unit': 'hours', 'csv': 'sleep_data.csv', 'label': 'Sleep Hours', 'column': 'value'},
     'hydration': {'goal': 2, 'unit': 'liters', 'csv': 'hydration_data.csv', 'label': 'Hydration (liters)', 'column': 'value'},
+    'calories': {'goal': 2300, 'unit': 'calories', 'csv': 'calorie_intake_data.csv', 'label': 'Calorie Intake', 'column': 'value'},
 }
 
 # NEW: Define month_names to pass to template (moved from index.html)
