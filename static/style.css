@@ -1,8 +1,7 @@
 body {
   margin: 0;
   padding: 0;
-  /* NEW: Add bottom padding for footer-like space */
-  padding-bottom: 50px;  /* Adjust this value as needed */
+  padding-bottom: 50px;
   background: #000;
   color: #fff;
   font-family: sans-serif;
@@ -61,7 +60,6 @@ body {
   border-radius: 5px;
 }
 
-/* Days-of-week row styling */
 .days-of-week-row {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -145,7 +143,6 @@ body {
   stroke: none;
 }
 
-/* NEW: Styles for the new range + chart section */
 .range-container {
   width: 100%;
   max-width: 800px;
@@ -211,15 +208,12 @@ body {
   padding: 10px;
 }
 
-
-/* NEW: Dashboard styles */
 .dashboard {
   display: flex;
   justify-content: center;
   gap: 20px;
-  /* NEW: Add top padding to lower the tabs and increase bottom margin for space */
-  padding-top: 30px;  /* Pushes tabs down from the top */
-  margin-bottom: 40px;  /* Increases space below tabs (previously 20px) */
+  padding-top: 30px;
+  margin-bottom: 40px;
 }
 
 .dashboard a {
@@ -237,32 +231,25 @@ body {
   color: #fff;
 }
 
-
-
-
-/* Add to the end of your existing style.css */
-
-/* NEW: Flex container for side-by-side layout */
 .content-wrapper {
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: 30px;
   max-width: 1200px;
-  margin: 20px auto;
+  margin: 80px auto;
 }
 
-/* NEW: Adjust widths and spacing */
 .calendar-container {
-  width: 40%;  /* NEW: Changed from 100%/max-width: 400px to fit side by side */
-  max-width: none;  /* NEW: Remove restrictive max-width */
+  width: 40%;
+  max-width: none;
   padding: 10px;
   box-sizing: border-box;
 }
 
 .range-container {
-  width: 60%;  /* NEW: Adjusted width to complement calendar */
-  max-width: none;  /* NEW: Remove restrictive max-width */
-  margin: 0;  /* NEW: Override original margin to fit flex layout */
+  width: 60%;
+  max-width: none;
+  margin: 0;
   background: #111;
   padding: 15px;
   box-sizing: border-box;
@@ -270,18 +257,6 @@ body {
   border-radius: 5px;
 }
 
-/* NEW: Flex container with increased top margin */
-.content-wrapper {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  max-width: 1200px;
-  margin: 80px auto;  /* NEW: Increased from 20px to 40px to move further down */
-}
-
-
-
-/* NEW: Stats table styles */
 .stats-table {
   width: 100%;
   max-width: 1200px;
@@ -319,5 +294,36 @@ body {
 }
 
 .stats-grid tr:last-child td {
-  border-bottom: none; /* Remove border from last row */
+  border-bottom: none;
+}
+
+.prediction-section {
+  width: 100%;
+  max-width: 1200px;
+  margin: 20px auto 0;
+  background: #111;
+  border: 1px solid #444;
+  border-radius: 5px;
+  padding: 15px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.prediction-title {
+  font-size: 20px;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.prediction-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: #00adee;
+}
+
+/* NEW: Style for prediction error */
+.prediction-error {
+  font-size: 16px;
+  color: #aaa;
+  margin-top: 10px;
 }

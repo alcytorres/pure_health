@@ -3,13 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <!-- NEW: Dynamic title -->
   <title>{{ label }} Calendar</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-<!-- NEW: Dashboard navigation -->
 <div class="dashboard">
   <a href="{{ url_for('index', data_type='steps', year=selected_year, month=selected_month) }}" {% if data_type == 'steps' %}class="active"{% endif %}>Steps</a>
   <a href="{{ url_for('index', data_type='hydration', year=selected_year, month=selected_month) }}" {% if data_type == 'hydration' %}class="active"{% endif %}>Hydration</a>
@@ -17,7 +15,6 @@
   <a href="{{ url_for('index', data_type='sleep', year=selected_year, month=selected_month) }}" {% if data_type == 'sleep' %}class="active"{% endif %}>Sleep</a>
 </div>
 
-<!-- NEW: Wrap calendar and range sections in a flex container -->
 <div class="content-wrapper">
   <div class="calendar-container">
     <form method="GET" class="month-year-form">
@@ -134,10 +131,21 @@
       <canvas id="lineChart"></canvas>
     </div>
   </div>
-</div> <!-- NEW: Closing tag for content-wrapper -->
+</div>
 
+<!-- NEW: Updated prediction section with error display -->
+{% if data_type == 'steps' and prediction is not none %}
+<div class="prediction-section">
+  <h2 class="prediction-title">Predicted Avg Steps for Next Week ({{ week_range }})</h2>
+  <p class="prediction-value">{{ "{:,.0f}".format(prediction) }} steps</p>
+  {% if prediction_error is not none %}
+  <p class="prediction-error">Average Prediction Error: {{ "{:,.0f}".format(prediction_error) }} steps</p>
+  {% else %}
+  <p class="prediction-error">Average Prediction Error: N/A (awaiting more data)</p>
+  {% endif %}
+</div>
+{% endif %}
 
-<!-- NEW: Stats table section -->
 <div class="stats-table">
   <h2 class="stats-title">Stats for {{ stats_range }}</h2>
   <table class="stats-grid">
@@ -151,50 +159,40 @@
     <tbody>
       <tr>
         <td>Max Value</td>
-        <!-- NEW: Apply comma formatting (no decimals) -->
         <td>{{ "{:,.0f}".format(current_stats.max) }} {{ unit }}</td>
         <td>{{ "{:,.0f}".format(all_time_stats.max) }} {{ unit }}</td>
       </tr>
       <tr>
         <td>Min Value</td>
-        <!-- NEW: Apply comma formatting (no decimals) -->
         <td>{{ "{:,.0f}".format(current_stats.min) }} {{ unit }}</td>
         <td>{{ "{:,.0f}".format(all_time_stats.min) }} {{ unit }}</td>
       </tr>
       <tr>
         <td>Average Value</td>
-        <!-- NEW: Apply comma formatting with one decimal place -->
-        <!-- NEW: If data_type is steps, round without decimals; otherwise, round to one decimal place -->
         <td>{{ "{:,.0f}".format(current_stats.avg) if data_type == 'steps' else "{:,.1f}".format(current_stats.avg) }} {{ unit }}</td>
         <td>{{ "{:,.0f}".format(all_time_stats.avg) if data_type == 'steps' else "{:,.1f}".format(all_time_stats.avg) }} {{ unit }}</td>
-        </tr>
+      </tr>
       <tr>
         <td>Highest Streak (Goal)</td>
-        <!-- NEW: Apply comma formatting (no decimals) -->
         <td>{{ "{:,.0f}".format(current_stats.highest_streak) }} days</td>
         <td>{{ "{:,.0f}".format(all_time_stats.highest_streak) }} days</td>
       </tr>
       <tr>
         <td>Current Streak (Goal)</td>
-        <!-- NEW: Apply comma formatting (no decimals) -->
         <td>{{ "{:,.0f}".format(current_stats.current_streak) }} days</td>
         <td>N/A</td>
       </tr>
       <tr>
         <td>% Days Meeting Goal</td>
-        <!-- NEW: Apply comma formatting with one decimal place -->
         <td>{{ "{:,.1f}".format(current_stats.goal_percent) }}%</td>
         <td>{{ "{:,.1f}".format(all_time_stats.goal_percent) }}%</td>
       </tr>
     </tbody>
   </table>
 </div>
-</div> <!-- NEW: Closing content-wrapper (already present if previous change applied) -->
-
 
 <script src="{{ url_for('static', filename='script.js') }}"></script>
 <script>
-/* NEW: Embedded data for the chart with dynamic variables */
 const dataType = "{{ data_type }}";
 const chartLabels = {{ chart_labels | tojson }};
 const chartValues = {{ chart_values | tojson }};

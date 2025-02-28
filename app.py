@@ -2,10 +2,15 @@ from flask import Flask, render_template, request
 import csv
 from datetime import datetime, timedelta
 import calendar
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+import numpy as np
+# NEW: For file operations
+import os
 
 app = Flask(__name__)
 
-# NEW: Define data types with their goals, units, CSV files, and labels
+# Existing data_types dictionary (unchanged)
 data_types = {
     'steps': {'goal': 8000, 'unit': 'steps', 'csv': 'steps_data.csv', 'label': 'Steps', 'column': 'steps'},
     'sleep': {'goal': 8, 'unit': 'hours', 'csv': 'sleep_data.csv', 'label': 'Sleep Hours', 'column': 'value'},
@@ -13,20 +18,101 @@ data_types = {
     'calories': {'goal': 2300, 'unit': 'calories', 'csv': 'calorie_intake_data.csv', 'label': 'Calorie Intake', 'column': 'value'},
 }
 
-# NEW: Define month_names to pass to template (moved from index.html)
+# Existing month_names (unchanged)
 month_names = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
 ]
 
+# NEW: Function to save prediction to CSV
+def save_prediction(prediction, week_start, week_end):
+    file_exists = os.path.isfile('step_predictions.csv')
+    with open('step_predictions.csv', 'a', newline='') as f:
+        writer = csv.writer(f)
+        if not file_exists:
+            writer.writerow(['week_start', 'week_end', 'predicted_steps'])
+        writer.writerow([week_start.strftime('%Y-%m-%d'), week_end.strftime('%Y-%m-%d'), prediction])
+
+# NEW: Function to evaluate predictions
+def evaluate_predictions():
+    try:
+        # Load actual steps and predictions
+        steps_df = pd.read_csv('steps_data.csv', parse_dates=['date'])
+        preds_df = pd.read_csv('step_predictions.csv', parse_dates=['week_start', 'week_end'])
+        
+        # Calculate weekly averages from actual data
+        steps_df['week_start'] = steps_df['date'] - pd.to_timedelta(steps_df['date'].dt.weekday + 1, unit='D') + pd.offsets.Week(weekday=6)
+        weekly_actual = steps_df.groupby('week_start')['steps'].mean().reset_index()
+        
+        # Merge with predictions where actual data exists
+        merged = preds_df.merge(weekly_actual, left_on='week_start', right_on='week_start', how='inner')
+        if merged.empty:
+            return None  # No overlapping data yet
+        
+        # Calculate Mean Absolute Error
+        mae = abs(merged['predicted_steps'] - merged['steps']).mean()
+        return round(mae, 0)
+    except Exception as e:
+        print(f"Evaluation error: {e}")
+        return None
+
+# NEW: Updated function to predict and save
+def predict_next_week_steps():
+    try:
+        # Load and filter data (exclude 2024, include 2016-2023 and 2025 up to Feb 28)
+        df = pd.read_csv('steps_data.csv', parse_dates=['date'])
+        df = df[(df['date'].dt.year <= 2023) | ((df['date'].dt.year == 2025) & (df['date'] <= '2025-02-28'))]
+        
+        # Group by week and calculate average steps
+        df['week'] = df['date'].dt.isocalendar().week
+        df['year'] = df['date'].dt.year
+        weekly_avg = df.groupby(['year', 'week'])['steps'].mean().reset_index()
+        
+        # Weight 2025 data higher
+        weekly_avg['weight'] = np.where(weekly_avg['year'] == 2025, 1.2, 1.0)
+        
+        # Prepare features and target
+        X = weekly_avg[['year', 'week']]
+        y = weekly_avg['steps']
+        weights = weekly_avg['weight']
+        
+        # Train model
+        model = LinearRegression()
+        model.fit(X, y, sample_weight=weights)
+        
+        # Use current date dynamically
+        current_date = datetime.now()
+        current_week = current_date.isocalendar()[1]
+        current_year = current_date.year
+        next_week = current_week + 1
+        next_year = current_year if next_week <= 52 else current_year + 1
+        next_week = next_week % 52 if next_week > 52 else next_week
+        
+        # Calculate next week's date range
+        days_to_sunday = (6 - current_date.weekday() + 1) % 7
+        week_start = current_date + timedelta(days=days_to_sunday)
+        week_end = week_start + timedelta(days=6)
+        week_range = f"{week_start.strftime('%b %-d')} - {week_end.strftime('%b %-d')}"
+        
+        # Predict steps for next week
+        prediction = model.predict([[next_year, next_week]])[0]
+        prediction = round(prediction, 0)
+        
+        # NEW: Save the prediction
+        save_prediction(prediction, week_start, week_end)
+        
+        return prediction, week_range
+    except Exception as e:
+        print(f"Prediction error: {e}")
+        return 0, "N/A"
+
 @app.route('/', methods=['GET'])
 def index():
-    # NEW: Get data_type from query parameters, default to 'steps'
+    # Existing logic (unchanged)
     data_type = request.args.get('data_type', 'steps')
     if data_type not in data_types:
         data_type = 'steps'
     
-    # NEW: Set variables based on selected data type
     csv_file = data_types[data_type]['csv']
     goal = data_types[data_type]['goal']
     unit = data_types[data_type]['unit']
@@ -41,7 +127,7 @@ def index():
         month = int(month_str)
     except:
         year = 2024
-        month = 11
+        month = 12
 
     if year < 2016:
         year = 2016
@@ -66,18 +152,16 @@ def index():
         end_date = datetime(year, month, 31)
     days_in_month = (end_date - start_date).days
 
-    # NEW: Read data dynamically based on data_type column
     all_data = {}
     with open(csv_file, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
             try:
                 d = datetime.strptime(row['date'], '%Y-%m-%d').date()
-                all_data[d] = float(row[column])  # Use float to handle both steps (int) and sleep/hydration (decimal)
+                all_data[d] = float(row[column])
             except:
                 pass
 
-    # NEW: Generalized from steps_data_month to data_month
     data_month = {}
     for day_num in range(1, days_in_month + 1):
         date_key = datetime(year, month, day_num).date()
@@ -92,7 +176,7 @@ def index():
     month_grid = []
     for _ in range(start_dow_sunday):
         month_grid.append((0, 0, True))
-    for day, value in month_data:  # NEW: Changed 'steps' to 'value'
+    for day, value in month_data:
         month_grid.append((day, value, False))
 
     start_date_str = request.args.get('start_date', '')
@@ -119,7 +203,6 @@ def index():
     if range_start > range_end:
         range_start, range_end = range_end, range_start
 
-    # NEW: Generalized from date_steps_list to date_value_list
     date_cursor = range_start
     date_value_list = []
     while date_cursor <= range_end:
@@ -129,13 +212,13 @@ def index():
 
     grouped_data = []
     if group_by == 'day':
-        for d, val in date_value_list:  # NEW: Changed 'st' to 'val'
+        for d, val in date_value_list:
             label = d.strftime('%m-%d')
             grouped_data.append((label, val))
     elif group_by == 'week':
         week_sums = {}
         week_counts = {}
-        for d, val in date_value_list:  # NEW: Changed 'st' to 'val'
+        for d, val in date_value_list:
             yw = d.isocalendar()[0:2]
             if yw not in week_sums:
                 week_sums[yw] = 0
@@ -150,7 +233,7 @@ def index():
     else:
         month_sums = {}
         month_counts = {}
-        for d, val in date_value_list:  # NEW: Changed 'st' to 'val'
+        for d, val in date_value_list:
             ym = (d.year, d.month)
             if ym not in month_sums:
                 month_sums[ym] = 0
@@ -166,14 +249,13 @@ def index():
     chart_labels = [t[0] for t in grouped_data]
     chart_values = [round(t[1], 2) for t in grouped_data]
 
-    # NEW: Helper function to calculate stats
     def calculate_stats(data_list, goal):
         if not data_list:
             return {
                 'max': 0, 'min': 0, 'avg': 0, 'highest_streak': 0,
                 'current_streak': 0, 'goal_percent': 0
             }
-        values = [v for _, v in data_list if v > 0]  # Exclude zeros for min
+        values = [v for _, v in data_list if v > 0]
         if not values:
             return {
                 'max': 0, 'min': 0, 'avg': 0, 'highest_streak': 0,
@@ -183,7 +265,6 @@ def index():
         min_val = min(values)
         avg_val = sum(values) / len(values)
         
-        # Calculate streaks
         current_streak = 0
         highest_streak = 0
         for i in range(len(data_list)):
@@ -192,11 +273,9 @@ def index():
                 highest_streak = max(highest_streak, current_streak)
             else:
                 current_streak = 0
-        # For current streak, assume it continues to today if at the end
         if data_list and data_list[-1][1] >= goal:
-            current_streak = sum(1 for d, v in data_list[-30:] if v >= goal)  # Last 30 days as proxy
+            current_streak = sum(1 for d, v in data_list[-30:] if v >= goal)
 
-        # Percentage of days meeting goal
         goal_met = sum(1 for _, v in data_list if v >= goal)
         goal_percent = (goal_met / len(data_list) * 100) if data_list else 0
 
@@ -206,17 +285,18 @@ def index():
             'goal_percent': round(goal_percent, 1)
         }
 
-    # NEW: Calculate stats for filtered range (current period)
     current_stats = calculate_stats(date_value_list, goal)
-
-    # NEW: Calculate stats for all-time (full dataset)
     all_time_stats = calculate_stats([(d, v) for d, v in all_data.items()], goal)
 
-    # NEW: Create stats_range string for the stats header based on the selected date range
-    start_display = range_start.strftime('%b') + " " + str(range_start.day)  # e.g., "Dec 1"
-    end_display = range_end.strftime('%b') + " " + str(range_end.day)          # e.g., "Dec 31"
+    start_display = range_start.strftime('%b') + " " + str(range_start.day)
+    end_display = range_end.strftime('%b') + " " + str(range_end.day)
     stats_range = start_display + " - " + end_display
 
+    # NEW: Get prediction, week range, and evaluation for steps only
+    prediction, week_range = predict_next_week_steps() if data_type == 'steps' else (None, None)
+    prediction_error = evaluate_predictions() if data_type == 'steps' else None
+
+    # Existing render_template with updated variables
     return render_template(
         'index.html',
         month_data=month_data,
@@ -233,12 +313,13 @@ def index():
         group_by=group_by,
         chart_labels=chart_labels,
         chart_values=chart_values,
-        # NEW: Pass stats_range to the template for dynamic stats header
         stats_range=stats_range,
         current_stats=current_stats,
-        all_time_stats=all_time_stats
+        all_time_stats=all_time_stats,
+        prediction=prediction,
+        week_range=week_range,
+        prediction_error=prediction_error  # NEW: Pass error to template
     )
-
 
 if __name__ == '__main__':
     app.run(debug=True)
