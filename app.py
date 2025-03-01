@@ -5,7 +5,6 @@ import calendar
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 import numpy as np
-# NEW: For file operations
 import os
 
 app = Flask(__name__)
@@ -24,91 +23,95 @@ month_names = [
     'July', 'August', 'September', 'October', 'November', 'December'
 ]
 
-# NEW: Function to save prediction to CSV
+# NEW: Function to train the model (extracted for reuse)
+def train_steps_model():
+    df = pd.read_csv('steps_data.csv', parse_dates=['date'])
+    df = df[(df['date'].dt.year <= 2023) | ((df['date'].dt.year == 2025) & (df['date'] <= '2025-02-28'))]
+    df['week'] = df['date'].dt.isocalendar().week
+    df['year'] = df['date'].dt.year
+    weekly_avg = df.groupby(['year', 'week'])['steps'].mean().reset_index()
+    weekly_avg['weight'] = np.where(weekly_avg['year'] == 2025, 1.2, 1.0)
+    X = weekly_avg[['year', 'week']]
+    y = weekly_avg['steps']
+    weights = weekly_avg['weight']
+    model = LinearRegression()
+    model.fit(X, y, sample_weight=weights)
+    return model
+
+# NEW: Function to save prediction if not already present
 def save_prediction(prediction, week_start, week_end):
     file_exists = os.path.isfile('step_predictions.csv')
-    with open('step_predictions.csv', 'a', newline='') as f:
-        writer = csv.writer(f)
-        if not file_exists:
-            writer.writerow(['week_start', 'week_end', 'predicted_steps'])
-        writer.writerow([week_start.strftime('%Y-%m-%d'), week_end.strftime('%Y-%m-%d'), prediction])
+    predictions = []
+    if file_exists:
+        with open('step_predictions.csv', 'r') as f:
+            reader = csv.DictReader(f)
+            predictions = [(row['week_start'], float(row['predicted_steps'])) for row in reader]
+    
+    week_start_str = week_start.strftime('%Y-%m-%d')
+    if not any(p[0] == week_start_str for p in predictions):
+        with open('step_predictions.csv', 'a', newline='') as f:
+            writer = csv.writer(f)
+            if not file_exists:
+                writer.writerow(['week_start', 'week_end', 'predicted_steps'])
+            writer.writerow([week_start_str, week_end.strftime('%Y-%m-%d'), prediction])
 
 # NEW: Function to evaluate predictions
 def evaluate_predictions():
     try:
-        # Load actual steps and predictions
         steps_df = pd.read_csv('steps_data.csv', parse_dates=['date'])
         preds_df = pd.read_csv('step_predictions.csv', parse_dates=['week_start', 'week_end'])
-        
-        # Calculate weekly averages from actual data
         steps_df['week_start'] = steps_df['date'] - pd.to_timedelta(steps_df['date'].dt.weekday + 1, unit='D') + pd.offsets.Week(weekday=6)
         weekly_actual = steps_df.groupby('week_start')['steps'].mean().reset_index()
-        
-        # Merge with predictions where actual data exists
         merged = preds_df.merge(weekly_actual, left_on='week_start', right_on='week_start', how='inner')
         if merged.empty:
-            return None  # No overlapping data yet
-        
-        # Calculate Mean Absolute Error
+            return None
         mae = abs(merged['predicted_steps'] - merged['steps']).mean()
         return round(mae, 0)
     except Exception as e:
         print(f"Evaluation error: {e}")
         return None
 
-# NEW: Updated function to predict and save
-def predict_next_week_steps():
+# NEW: Updated function to predict for prior, current, and next weeks
+def predict_weekly_steps():
     try:
-        # Load and filter data (exclude 2024, include 2016-2023 and 2025 up to Feb 28)
-        df = pd.read_csv('steps_data.csv', parse_dates=['date'])
-        df = df[(df['date'].dt.year <= 2023) | ((df['date'].dt.year == 2025) & (df['date'] <= '2025-02-28'))]
-        
-        # Group by week and calculate average steps
-        df['week'] = df['date'].dt.isocalendar().week
-        df['year'] = df['date'].dt.year
-        weekly_avg = df.groupby(['year', 'week'])['steps'].mean().reset_index()
-        
-        # Weight 2025 data higher
-        weekly_avg['weight'] = np.where(weekly_avg['year'] == 2025, 1.2, 1.0)
-        
-        # Prepare features and target
-        X = weekly_avg[['year', 'week']]
-        y = weekly_avg['steps']
-        weights = weekly_avg['weight']
-        
-        # Train model
-        model = LinearRegression()
-        model.fit(X, y, sample_weight=weights)
-        
-        # Use current date dynamically
+        model = train_steps_model()
         current_date = datetime.now()
-        current_week = current_date.isocalendar()[1]
-        current_year = current_date.year
-        next_week = current_week + 1
-        next_year = current_year if next_week <= 52 else current_year + 1
-        next_week = next_week % 52 if next_week > 52 else next_week
-        
-        # Calculate next week's date range
         days_to_sunday = (6 - current_date.weekday() + 1) % 7
-        week_start = current_date + timedelta(days=days_to_sunday)
-        week_end = week_start + timedelta(days=6)
-        week_range = f"{week_start.strftime('%b %-d')} - {week_end.strftime('%b %-d')}"
+        current_week_start = current_date + timedelta(days=days_to_sunday - 7)  # Adjust to current week's Sunday
         
-        # Predict steps for next week
-        prediction = model.predict([[next_year, next_week]])[0]
-        prediction = round(prediction, 0)
+        # Define week ranges
+        weeks = [
+            (current_week_start - timedelta(days=7), "Prior Week"),  # Prior week
+            (current_week_start, "Current Week"),                    # Current week
+            (current_week_start + timedelta(days=7), "Next Week")    # Next week
+        ]
         
-        # NEW: Save the prediction
-        save_prediction(prediction, week_start, week_end)
+        predictions = []
+        for week_start, label in weeks:
+            week_end = week_start + timedelta(days=6)
+            # NEW: Updated to include full year for display
+            week_range = f"{week_start.strftime('%b %-d, %Y')} - {week_end.strftime('%b %-d, %Y')}"
+            week_num = week_start.isocalendar()[1]
+            year = week_start.year
+            prediction = model.predict([[year, week_num]])[0]
+            prediction = round(prediction, 0)
+            
+            # Save only if not already present
+            save_prediction(prediction, week_start, week_end)
+            
+            predictions.append({
+                'label': label,
+                'week_range': week_range,
+                'prediction': prediction
+            })
         
-        return prediction, week_range
+        return predictions
     except Exception as e:
         print(f"Prediction error: {e}")
-        return 0, "N/A"
+        return [{'label': label, 'week_range': 'N/A', 'prediction': 0} for label in ["Prior Week", "Current Week", "Next Week"]]
 
 @app.route('/', methods=['GET'])
 def index():
-    # Existing logic (unchanged)
     data_type = request.args.get('data_type', 'steps')
     if data_type not in data_types:
         data_type = 'steps'
@@ -288,15 +291,14 @@ def index():
     current_stats = calculate_stats(date_value_list, goal)
     all_time_stats = calculate_stats([(d, v) for d, v in all_data.items()], goal)
 
-    start_display = range_start.strftime('%b') + " " + str(range_start.day)
-    end_display = range_end.strftime('%b') + " " + str(range_end.day)
+    start_display = range_start.strftime('%b %-d, %Y')
+    end_display = range_end.strftime('%b %-d, %Y')
     stats_range = start_display + " - " + end_display
 
-    # NEW: Get prediction, week range, and evaluation for steps only
-    prediction, week_range = predict_next_week_steps() if data_type == 'steps' else (None, None)
+    # NEW: Get predictions and evaluation for steps only
+    weekly_predictions = predict_weekly_steps() if data_type == 'steps' else None
     prediction_error = evaluate_predictions() if data_type == 'steps' else None
 
-    # Existing render_template with updated variables
     return render_template(
         'index.html',
         month_data=month_data,
@@ -316,9 +318,8 @@ def index():
         stats_range=stats_range,
         current_stats=current_stats,
         all_time_stats=all_time_stats,
-        prediction=prediction,
-        week_range=week_range,
-        prediction_error=prediction_error  # NEW: Pass error to template
+        weekly_predictions=weekly_predictions,  # NEW: Pass list of predictions
+        prediction_error=prediction_error
     )
 
 if __name__ == '__main__':

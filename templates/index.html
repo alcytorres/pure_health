@@ -133,11 +133,14 @@
   </div>
 </div>
 
-<!-- NEW: Updated prediction section with error display -->
-{% if data_type == 'steps' and prediction is not none %}
+<!-- NEW: Updated prediction section with prior, current, next week predictions -->
+{% if data_type == 'steps' and weekly_predictions is not none %}
 <div class="prediction-section">
-  <h2 class="prediction-title">Predicted Avg Steps for Next Week ({{ week_range }})</h2>
-  <p class="prediction-value">{{ "{:,.0f}".format(prediction) }} steps</p>
+  <h2 class="prediction-title">Predicted Average Weekly Steps</h2>
+  {% for pred in weekly_predictions %}
+  <p class="prediction-week">{{ pred.label }} ({{ pred.week_range }})</p>
+  <p class="prediction-value">{{ "{:,.0f}".format(pred.prediction) }} steps</p>
+  {% endfor %}
   {% if prediction_error is not none %}
   <p class="prediction-error">Average Prediction Error: {{ "{:,.0f}".format(prediction_error) }} steps</p>
   {% else %}
